@@ -1,4 +1,0 @@
-name,n,threshold,max_length,rule_number,rule_length,cluster_num
-ALOI,2,0.8,10,475,2052,11
-ALOI,4,0.8,10,479,2448,11
-ALOI,8,0.8,10,517,2210,11
