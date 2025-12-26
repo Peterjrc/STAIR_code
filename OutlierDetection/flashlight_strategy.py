@@ -1,7 +1,10 @@
 import pandas as pd
 from lca import lca, is_approx_equal
 from information_gain import information_gain
-
+from load_data import load_data
+import numpy as np
+from sklearn.neighbors import LocalOutlierFactor
+import os
 
 def generate_lca_set(sample, data):
     """生成LCA集合"""
@@ -77,8 +80,6 @@ def calculate_precision_recall_f1(explanation_table, data, positive_index):
 
 
 
-
-
 def flashlight_strategy(sample, data, positive_index, max_patterns=None, min_info_gain=None, min_f1=0.8):
     lca_set = generate_lca_set(sample, data)
     explanation_table = []
@@ -116,12 +117,46 @@ def flashlight_strategy(sample, data, positive_index, max_patterns=None, min_inf
 
         # 计算并检查 F1 分数
         _, _, f1 = calculate_precision_recall_f1(explanation_table, data, positive_index)
-        # print(f1, len(explanation_table))
-        # if min_f1 is not None and f1 >= min_f1:
-        #     break
+        print(f1, len(explanation_table))
+        if min_f1 is not None and f1 >= min_f1:
+            break
 
     explanation_table_df = pd.DataFrame(explanation_table)
     return explanation_table_df
 
 
 
+def run_lof(X, y, num_outliers=560, k=60):
+    clf = LocalOutlierFactor(n_neighbors=k)
+    clf.fit(X)
+    lof_scores = -clf.negative_outlier_factor_
+    threshold = np.sort(lof_scores)[::-1][num_outliers]
+    lof_predictions = np.array(lof_scores > threshold)
+    lof_predictions = np.array([int(i) for i in lof_predictions])
+
+    return lof_predictions, lof_scores
+
+
+if __name__ == '__main__':
+    data_dir = '../data/'
+    data_list = ['skin']
+    ratio = 0.02
+
+    for name in data_list:
+        X, y, lof_krange, N_range, knn_krange, if_range, mahalanobis_N_range = load_data(name, data_dir=data_dir)
+        X, y = np.array(X), np.array(y)
+        print(X.shape)
+        lof_predictions, lof_scores = run_lof(X, y, k=lof_krange[7], num_outliers=int(np.sum(y)))
+        outlier_idxes = np.where(lof_predictions == 1)[0]
+        Outliers = X[outlier_idxes]
+        idxes = np.where(lof_predictions == 0)[0]
+        selected_indices = np.random.choice(np.arange(len(idxes)), size=int(len(idxes) * ratio), replace=False)
+        Inliers = X[idxes][selected_indices]
+        X_new = np.concatenate([Outliers, Inliers], axis=0)
+        lof_predictions_new = np.concatenate([np.ones(len(Outliers)), np.zeros(len(Inliers))], axis=0)
+
+        sample = Inliers[:1]
+        data = np.concatenate([X_new, lof_predictions_new.reshape(-1, 1)], axis=1)
+
+    df = flashlight_strategy(sample, data, -1, min_f1=0.8)
+    print(df)

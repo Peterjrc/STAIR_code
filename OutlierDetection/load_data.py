@@ -1,6 +1,10 @@
 import os
 import numpy as np
 from utils import *
+import pandas as pd
+from sklearn.neighbors import LocalOutlierFactor
+from sklearn.ensemble import IsolationForest
+from sklearn.neighbors import NearestNeighbors
 
 
 def load_data(name, data_dir='../data/'):
@@ -31,7 +35,8 @@ def load_data(name, data_dir='../data/'):
         # [0.53446205 0.27996802 0.1267319  0.03581897 0.01230324]
         filename = f'{data_dir}PageBlocks_norm_10.arff'
         X, y = load_dataset(filename=filename)
-        print(np.shape(X), np.shape(y))
+        print(f'the shape of X: {np.shape(X)}, the shape of y: {np.shape(y)}')
+        # print(X)
         K = 80
         N = 560
         # num_outliers = [N, N, N, N]
@@ -129,7 +134,25 @@ def load_data(name, data_dir='../data/'):
     elif name == 'Annthyroid':
         # Good
         # [0.30686872 0.1602263  0.09127541 0.08518756 0.06812179]
-        filename = f'{data_dir}Annthyroid/Annthyroid_withoutdupl_norm_07.arff'
+        filename = f'{data_dir}Annthyroid_withoutdupl_norm_07.arff'
+        X, y = load_dataset(filename=filename)
+        print(np.shape(X), np.shape(y))
+        print(sum(y) / len(y))
+        N = 534
+        num_outliers = [N, N, N, N]
+        class_balance = [1 - N / 7129.0, N / 7129.0]
+        lof_krange = list(range(10, 110, 10)) * 6
+        knn_krange = list(range(10, 110, 10)) * 6
+        if_range = [0.5, 0.6, 0.7, 0.8, 0.9] * 6
+        # mahalanobis_N_range=[N]
+        mahalanobis_N_range = [300, 400, 500, 600, 700, 800]
+        if_N_range = np.sort(mahalanobis_N_range * 5)
+        N_range = np.sort(mahalanobis_N_range * 10)
+
+    elif name == 'Mulcross':
+        # Good
+        # [0.30686872 0.1602263  0.09127541 0.08518756 0.06812179]
+        filename = f'{data_dir}Mulcross.arff'
         X, y = load_dataset(filename=filename)
         print(np.shape(X), np.shape(y))
         print(sum(y) / len(y))
@@ -158,6 +181,63 @@ def load_data(name, data_dir='../data/'):
         knn_krange = list(range(10, 110, 10)) * 6
         if_range = [0.5, 0.6, 0.7, 0.8, 0.9] * 6
         mahalanobis_N_range = [100, 120, 140, 160, 180, 200]
+        # mahalanobis_N_range = [20, 40, 60,80, 100,120]
+        if_N_range = np.sort(mahalanobis_N_range * 5)
+        N_range = np.sort(mahalanobis_N_range * 10)
+        print(np.shape(X))
+
+    elif name == 'http':
+        # Good
+        # [0.50269984 0.06793196 0.04755742 0.04595905 0.03887756]
+        import hdf5storage
+        mat = hdf5storage.loadmat(f'{data_dir}http.mat')
+        X = mat['X']
+        y = mat['y']
+        print(len(y))
+        print(np.sum(y))
+        print(np.sum(y) / len(y))
+        lof_krange = list(range(10, 110, 10)) * 6
+        knn_krange = list(range(10, 110, 10)) * 6
+        if_range = [0.5, 0.6, 0.7, 0.8, 0.9] * 6
+        mahalanobis_N_range = [100, 120, 140, 160, 180, 200]
+        # mahalanobis_N_range = [20, 40, 60,80, 100,120]
+        if_N_range = np.sort(mahalanobis_N_range * 5)
+        N_range = np.sort(mahalanobis_N_range * 10)
+        print(np.shape(X))
+
+    elif name == 'ionosphere':
+        # [0.69531941 0.1529895  0.03707588 0.03439687 0.02486027]
+        # Good
+        import hdf5storage
+        mat = hdf5storage.loadmat(f'{data_dir}ionosphere.mat')
+        X = mat['X']
+        y = mat['y']
+        print(len(y))
+        print(np.sum(y))
+        print(np.sum(y) / len(y))
+        lof_krange = list(range(10, 110, 10)) * 6
+        knn_krange = list(range(10, 110, 10)) * 6
+        if_range = [0.5, 0.6, 0.7, 0.8, 0.9] * 6
+        mahalanobis_N_range = [60, 80, 100, 120, 140, 160]
+        # mahalanobis_N_range = [20, 40, 60,80, 100,120]
+        if_N_range = np.sort(mahalanobis_N_range * 5)
+        N_range = np.sort(mahalanobis_N_range * 10)
+        print(np.shape(X))
+
+    elif name == 'optdigits':
+        # [0.69531941 0.1529895  0.03707588 0.03439687 0.02486027]
+        # Good
+        import hdf5storage
+        mat = hdf5storage.loadmat(f'{data_dir}optdigits.mat')
+        X = mat['X']
+        y = mat['y']
+        print(len(y))
+        print(np.sum(y))
+        print(np.sum(y) / len(y))
+        lof_krange = list(range(10, 110, 10)) * 6
+        knn_krange = list(range(10, 110, 10)) * 6
+        if_range = [0.5, 0.6, 0.7, 0.8, 0.9] * 6
+        mahalanobis_N_range = [60, 80, 100, 120, 140, 160]
         # mahalanobis_N_range = [20, 40, 60,80, 100,120]
         if_N_range = np.sort(mahalanobis_N_range * 5)
         N_range = np.sort(mahalanobis_N_range * 10)
@@ -258,8 +338,26 @@ def load_data(name, data_dir='../data/'):
     elif name == 'KDDCup99':
         # Bad
         # [0.32026138 0.28972426 0.12317104 0.09837007 0.04957106]
-        filename = f'{data_dir}KDDCup99/KDDCup99_withoutdupl_norm_catremoved.arff'
+        filename = f'{data_dir}/KDDCup99_withoutdupl_norm_catremoved.arff'
         X, y = load_dataset(filename=filename)
+        print(np.shape(X), np.shape(y))
+        print(sum(y))
+        N = 200
+        num_outliers = [N, N, N, N]
+        class_balance = [1 - N / 48113.0, N / 48113.0]
+        lof_krange = list(range(10, 110, 10)) * 6
+        knn_krange = list(range(10, 110, 10)) * 6
+        if_range = [0.5, 0.6, 0.7, 0.8, 0.9] * 6
+        mahalanobis_N_range = [500, 1000, 1500, 2000, 2500, 3000]
+        # mahalanobis_N_range = [20, 40, 60,80, 100,120]
+        if_N_range = np.sort(mahalanobis_N_range * 5)
+        N_range = np.sort(mahalanobis_N_range * 10)
+
+    elif name == 'magic':
+        # Bad
+        # [0.32026138 0.28972426 0.12317104 0.09837007 0.04957106]
+        filename = f'{data_dir}magic.npz'
+        X, y = load_npz(path=filename)
         print(np.shape(X), np.shape(y))
         print(sum(y))
         N = 200
@@ -276,8 +374,8 @@ def load_data(name, data_dir='../data/'):
     elif name == 'ALOI':
         # Bad
         # [0.32026138 0.28972426 0.12317104 0.09837007 0.04957106]
-        filename = f'{data_dir}ALOI/ALOI_withoutdupl_norm.arff'
-        X, y = load_dataset(filename=filename)
+        filename = f'{data_dir}ALOI.npz'
+        X, y = load_npz(path=filename)
         print(np.shape(X), np.shape(y))
         print(sum(y))
         N = 200
@@ -290,6 +388,25 @@ def load_data(name, data_dir='../data/'):
         # mahalanobis_N_range = [20, 40, 60,80, 100,120]
         if_N_range = np.sort(mahalanobis_N_range * 5)
         N_range = np.sort(mahalanobis_N_range * 10)
+
+    elif name == 'skin':
+        # Bad
+        # [0.32026138 0.28972426 0.12317104 0.09837007 0.04957106]
+        filename = f'{data_dir}skin.npz'
+        X, y = load_npz(path=filename)
+        print(np.shape(X), np.shape(y))
+        print(sum(y))
+        N = 200
+        num_outliers = [N, N, N, N]
+        class_balance = [1 - N / 48113.0, N / 48113.0]
+        lof_krange = list(range(10, 110, 10)) * 6
+        knn_krange = list(range(10, 110, 10))
+        if_range = [0.5, 0.6, 0.7, 0.8, 0.9] * 6
+        mahalanobis_N_range = [500, 1000, 1500, 2000, 2500, 3000]
+        # mahalanobis_N_range = [20, 40, 60,80, 100,120]
+        if_N_range = np.sort(mahalanobis_N_range * 5)
+        N_range = np.sort(mahalanobis_N_range * 10)
+
 
     elif "Friday" in name or "Thursday" in name or "Wednesday" in name:
         filename = f'{data_dir}{name}-2018_processed.csv'
@@ -338,6 +455,25 @@ def load_data(name, data_dir='../data/'):
         if_N_range = np.sort(mahalanobis_N_range * 5)
         N_range = np.sort(mahalanobis_N_range * 10)
 
+    elif "diabetes" in name:
+        filename = f'{data_dir}{name}.csv'
+        data = pd.read_csv(filename)
+        y = data['label'].values
+        X = data.drop(columns=['label'])
+        print(X)
+        print(np.shape(X), np.shape(y))
+        K = 100
+        N = 268
+        print(N / len(y))
+        num_outliers = [N, N, N, N]
+        class_balance = [1 - N / 768.0, N / 768.0]
+        lof_krange = list(range(10, 210, 10)) * 6
+        knn_krange = list(range(10, 210, 10)) * 6
+        if_range = [0.5, 0.6, 0.7, 0.8, 0.9] * 6
+        mahalanobis_N_range = [N]
+        mahalanobis_N_range = [220, 230, 240, 250, 260, 270]
+        if_N_range = np.sort(mahalanobis_N_range * 5)
+        N_range = np.sort(mahalanobis_N_range * 20)
 
     else:
         print(f"{name} not recognized")
@@ -345,3 +481,91 @@ def load_data(name, data_dir='../data/'):
 
     y = y.reshape(-1)
     return X, y, lof_krange, N_range, knn_krange, if_range, mahalanobis_N_range
+
+
+
+
+if __name__ == '__main__':
+
+    show_data = True
+    draw_original = 0
+    draw_lof = 0
+    draw_rrl = 0
+
+    if draw_original:
+        data_list = ["Pendigits",  "satellite", "SpamBase", "Pima", "PageBlock", "Satimage-2"]
+        for name in data_list:
+            # print(name)
+            # name = name.split('_')[0]
+            X, y, lof_krange, N_range, knn_krange, if_range, mahalanobis_N_range = load_data(name, data_dir='../../FRL/falling_rule_list/data/')
+            y = y.reshape(-1,1)
+            data = np.concatenate((X, y), axis=1)
+            if show_data:
+                view_data(name, data)
+
+    elif draw_lof:
+        data_list = os.listdir('/Users/mse540/Desktop/Research/outlier_summ_复现/lof_predictions/')
+        for name in data_list:
+            df = pd.read_csv(os.path.join('/Users/mse540/Desktop/Research/outlier_summ_复现/lof_predictions', f"{name}"))
+            X, y = df.iloc[:, :-1], df.iloc[:, -1]
+            y = np.array(y).reshape(-1,1)
+            data = np.concatenate((X, y), axis=1)
+            if show_data:
+                view_data(name, data)
+
+    elif draw_rrl:
+        data_list = os.listdir('/Users/mse540/Desktop/Research/outlier_summ_复现/rrl_prediction')
+        for name in data_list:
+            df = pd.read_csv(os.path.join('/Users/mse540/Desktop/Research/outlier_summ_复现/rrl_prediction', f"{name}"))
+            X, y = df.iloc[:, :-1], df.iloc[:, -1]
+            y = np.array(y).reshape(-1,1)
+            data = np.concatenate((X, y), axis=1)
+            if show_data:
+                view_data(name, data)
+
+    else:
+        data_list = ["diabetes"]
+
+        from sklearn.neighbors import LocalOutlierFactor
+        from sklearn import metrics
+
+        lof_result = pd.DataFrame(columns = ['F1 score', 'Recall score', 'Precision score'])
+        for name in data_list:
+            # print(name)
+            print(name)
+            # name = name.split('_')[0]
+            X, y, lof_krange, N_range, knn_krange, if_range, mahalanobis_N_range = load_data(name, data_dir='../../FRL/falling_rule_list/data/')
+            X = np.array(X)
+            y = np.array(y)
+            y = y.reshape(-1, 1)
+            X_df = pd.DataFrame(X, columns=[f'attr{i}' for i in range(1, X.shape[1] + 1)])
+
+
+            def run_lof(X, y, file_name, num_outliers=560, k=60):
+                clf = LocalOutlierFactor(n_neighbors=lof_krange[7])
+
+                clf.fit(X)
+                lof_scores = -clf.negative_outlier_factor_
+                threshold = np.sort(lof_scores)[::-1][num_outliers]
+                lof_predictions = np.array(lof_scores > threshold)
+                lof_predictions = np.array([int(i) for i in lof_predictions])
+                f1_score = metrics.f1_score(y, lof_predictions)
+                print(f"F-1 score of LOF outlier detection for {file_name}:", f1_score)
+                recall_score = metrics.recall_score(y, lof_predictions)
+                precision_score = metrics.precision_score(y, lof_predictions)
+                return lof_predictions, lof_scores, f1_score, recall_score, precision_score
+
+
+            lof_predictions, lof_scores, f1_score, recall_score, precision_score = run_lof(X, y, file_name = name, k=lof_krange[7], num_outliers=int(np.sum(y)))
+
+            lof_result.loc[name, :] = [f1_score, recall_score, precision_score]
+            print(lof_result)
+            lof_prediction_df = pd.DataFrame(lof_predictions, columns=['label'])
+            true_labels_df = pd.DataFrame(y, columns=['label'])
+            df_bad = pd.concat((X_df, lof_prediction_df), axis=1)
+            df_clean = pd.concat((X_df, true_labels_df), axis=1)
+            print(df_bad.head())
+            print(df_clean.head())
+            # assert df_bad.iloc[:, :-1].values == df_clean.iloc[:, :-1].values
+            df_bad.to_csv(f"../lof_predictions/predict/{name}.csv", index=False)
+            df_clean.to_csv(f"../lof_predictions/real/{name}.csv", index=False)

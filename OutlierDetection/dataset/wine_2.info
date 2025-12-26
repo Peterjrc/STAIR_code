@@ -1,0 +1,15 @@
+class discrete
+alcohol continuous
+Malic-acid continuous
+Ash continuous
+Alcalinity-of-ash continuous
+Magnesium continuous
+Total-phenols continuous
+Flavanoids continuous
+Nonflavanoid-phenols continuous
+Proanthocyanins continuous
+Color-intensity continuous
+Hue continuous
+OD280/OD315-of-diluted-wines continuous
+Proline continuous
+LABEL_POS 0

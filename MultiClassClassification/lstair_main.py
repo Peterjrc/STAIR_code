@@ -349,7 +349,7 @@ if __name__ == '__main__':
     thresholds = [0.8]
     # max_lengths = [2, 4, 6, 8, 10, 12]
     max_lengths = [10]
-    data_dir = "../data/"
+    data_dir = "../../FRL/falling_rule_list/data/"
     # data_dir = '/data/wangyu/data/'
 
     results = []

@@ -13,6 +13,8 @@ from sklearn.neighbors import LocalOutlierFactor
 from sklearn.preprocessing import RobustScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn import metrics
+
+from OutlierDetection.main import cal_length_miss_outliers_entropy_gain
 from load_data import load_data
 
 
@@ -77,6 +79,7 @@ def cal_list_entropy(stats_list, lof_predictions, return_detail=False):
 
 
 class Node(object):
+    """define the attributes and behavior of nodes in decision tree"""
     def __init__(self):
         self.value = None
         self.decision = None
@@ -89,6 +92,7 @@ class Node(object):
         self.rule = rule
 
     def predict_single(self, x):
+        """recursive function until return the predicted label in the leaf node """
         if not self.is_leaf:
             if x[self.rule.split_attribute] <= self.rule.split_num:
                 return self.lchild.predict_single(x)
@@ -125,6 +129,7 @@ def findEntropy(data, rows):
 
 
 def cal_split_entropy(X, y, cur_rule, col, val):
+    """calculates the weighted entropy after splitting a dataset on a given feature at a specific threshold"""
     idxes_1 = cur_rule.idxes[np.where(X[cur_rule.idxes, col] <= val)]
     idxes_2 = cur_rule.idxes[np.where(X[cur_rule.idxes, col] > val)]
 
@@ -185,6 +190,9 @@ def cal_split_entropy(X, y, cur_rule, col, val):
 
 
 def findMaxGain(X, y, stats_list, rows, columns, cur_rule):
+    """find the best splitting attribute and value based on current rule (and all precious rules)
+    it calculates the information gain by incorporating all previous rules
+    """
     maxGain = 0
     best_split_num = None
     rows_smaller = None
@@ -198,20 +206,20 @@ def findMaxGain(X, y, stats_list, rows, columns, cur_rule):
 
     avg_entropy0, total_length0 = cal_list_entropy(stats_list, lof_predictions, return_detail=True)
     avg_entropy = (avg_entropy0 * total_length0 + entropy(cur_rule, lof_predictions) * cur_rule.num) / (cur_rule.num + total_length0)
-    cur_metric = avg_entropy
+    cur_metric = avg_entropy # current entropy for current node
 
     best_entropy = -1000
-    for col in columns:
+    for col in columns: # for each feature
 
-        for val in np.sort(np.unique(X[cur_rule.idxes, col]))[:-1]:
+        for val in np.sort(np.unique(X[cur_rule.idxes, col]))[:-1]: # for each value in each feature
 
-            new_avg_entropy = cal_split_entropy(X, y, cur_rule, col, val)
+            new_avg_entropy = cal_split_entropy(X, y, cur_rule, col, val) # weighted average entropy after splitting
 
             if new_avg_entropy > best_entropy:
                 best_attribute = col
-                maxGain = new_avg_entropy - cur_metric
+                maxGain = new_avg_entropy - cur_metric # information gain
                 best_split_num = val
-                rows_smaller = cur_rule.idxes[np.where(X[cur_rule.idxes, col] <= val)]
+                rows_smaller = cur_rule.idxes[np.where(X[cur_rule.idxes, col] <= val)] # rows belong to left node
                 rows_larger = cur_rule.idxes[np.where(X[cur_rule.idxes, col] > val)]
                 best_entropy = new_avg_entropy
 
@@ -594,9 +602,9 @@ def buildRuleTree(X, predictions, stats, cur_rule, stats_list, leaf_list, rows, 
 
         leaf_C = []
         for idx, rule in enumerate(leaf_list):
-            if rule.length_divide_entropy is None:
-                rule.length_divide_entropy, rule.split_attribute, rule.split_num = \
-                    cal_length_entropy_gain(rule, columns, X, predictions, max_length=max_length)
+            if rule.length_miss_outliers_divide_entropy is None:
+                rule.length_miss_outliers_divide_entropy, rule.split_attribute, rule.split_num = \
+                    cal_length_miss_outliers_entropy_gain(rule, columns, X, predictions, max_length=max_length)
 
             if rule.length_divide_entropy == -1:
                 leaf_C.append(np.inf)
@@ -694,7 +702,7 @@ def calculate(X, predictions, criterion=1, max_length=10, max_depth=-1, threshol
             self.label = label
             self.idxes = idxes
             self.attributes = attributes
-            self.length_divide_entropy = None
+            self.length_miss_outliers_divide_entropy = None
             self.split_attribute = None
             self.split_num = None
 
@@ -913,7 +921,7 @@ if __name__ == '__main__':
         names = ["Wine"]
     names = ["Wine"]
 
-    data_dir = r'../data/'
+    data_dir = r'../../FRL/falling_rule_list/data/'
     # data_dir = '/data/wangyu/data/'
     # data_dir = "D:/ANow/AutoOD exp code/data/"
     # max_lengths = [2, 4, 6, 8, 10, 12]
